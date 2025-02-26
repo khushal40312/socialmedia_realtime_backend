@@ -92,7 +92,16 @@ async function init() {
       res.status(500).json({ error: error.message });
     }
   });
-  
+  app.get("/test-db", async (req, res) => {
+  try {
+    await prismaClient.$connect();
+    res.json({ success: true, message: "Connected to Supabase!" });
+  } catch (error) {
+    console.error("Database connection failed:", error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
   app.get("/", (req, res) => {
     res.send("Hello, WebSocket + GraphQL is running!");
   });
