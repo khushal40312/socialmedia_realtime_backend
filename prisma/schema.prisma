@@ -1,0 +1,96 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                String         @id @default(uuid()) @map("id")
+  email             String         @unique
+  password          String
+  salt              String
+  firstName         String         @map("first_name")
+  followers         Int            @default(0)
+  lastName          String?        @map("last_name")
+  picture           String?        @map("profile_image_url")
+  following         Int            @default(0)
+  isActive          Boolean        @default(false)
+  lastActive        DateTime?
+  followersList     Follower[]     @relation("followerRelation")
+  followingList     Follower[]     @relation("followingRelation")
+  receivedMessages  Message[]      @relation("ReceivedMessages")
+  sentMessages      Message[]      @relation("SentMessages")
+  sentNotifications Notification[] @relation("NotificationSender")
+  notifications     Notification[] @relation("UserNotifications")
+  posts             Post[]
+  likedPosts        PostLike[]
+}
+
+model Message {
+  id         String   @id @default(uuid())
+  senderId   String
+  receiverId String
+  content    String
+  createdAt  DateTime @default(now())
+  read       Boolean  @default(false)
+  receiver   User     @relation("ReceivedMessages", fields: [receiverId], references: [id])
+  sender     User     @relation("SentMessages", fields: [senderId], references: [id])
+}
+
+model Follower {
+  id          String   @id @default(uuid())
+  followerId  String
+  followingId String
+  createdAt   DateTime @default(now())
+  follower    User     @relation("followerRelation", fields: [followerId], references: [id])
+  following   User     @relation("followingRelation", fields: [followingId], references: [id])
+
+  @@unique([followerId, followingId])
+}
+
+model Post {
+  id            String         @id @default(uuid())
+  title         String
+  content       String
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  authorId      String
+  likes         Int            @default(0)
+  notifications Notification[]
+  author        User           @relation(fields: [authorId], references: [id])
+  likedBy       PostLike[]
+}
+
+model PostLike {
+  id        String   @id @default(uuid())
+  postId    String
+  userId    String
+  createdAt DateTime @default(now())
+  post      Post     @relation(fields: [postId], references: [id])
+  user      User     @relation(fields: [userId], references: [id])
+
+  @@unique([postId, userId])
+}
+
+model Notification {
+  id        String   @id @default(uuid())
+  type      String
+  userId    String
+  postId    String?
+  senderId  String?
+  read      Boolean  @default(false)
+  createdAt DateTime @default(now())
+  firstName String
+  lastName  String?
+  postTitle String?
+  picture   String
+  post      Post?    @relation(fields: [postId], references: [id])
+  sender    User?    @relation("NotificationSender", fields: [senderId], references: [id])
+  user      User     @relation("UserNotifications", fields: [userId], references: [id])
+
+  @@index([userId])
+  @@index([postId])
+}
