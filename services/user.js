@@ -79,7 +79,7 @@ class UserService {
 
         // Hash the password with the salt
         const hashedPassword = await UserService.genrateHash(salt, password);
-        const defaultPicture = "default.jpg";
+        const defaultPicture = "https://res.cloudinary.com/dodnxrlj6/image/upload/v1740730369/default_jc14qo.jpg";
 
         // Store the user in the database
         const user = await prismaClient.user.create({
