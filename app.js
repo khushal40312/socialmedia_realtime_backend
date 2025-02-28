@@ -56,7 +56,7 @@ async function init() {
     cloudinary,
     params: {
       folder: "profile_pictures", // Cloudinary folder name
-      allowed_formats: ["jpg", "jpeg", "png"],
+      allowed_formats: ["jpg", "jpeg", "png","webp"],
     },
   });
   
