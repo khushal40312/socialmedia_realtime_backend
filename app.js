@@ -12,7 +12,8 @@ export const pubsub = new PubSub();
 import multer from "multer";
 import path from "path";
 import { prismaClient } from "./lib/db.js";
-// import { prismaClient } from "../lib/db.js";
+import { CloudinaryStorage } from "multer-storage-cloudinary";
+import cloudinary from "./lib/cloudnary.js";
 
 async function init() {
   const app = express();
@@ -51,13 +52,11 @@ async function init() {
   );
  
   
-  // Configure Multer storage
-  const storage = multer.diskStorage({
-    destination: (req, file, cb) => {
-      cb(null, "uploads/"); // Store images in the "uploads" directory
-    },
-    filename: (req, file, cb) => {
-      cb(null, Date.now() + path.extname(file.originalname)); // Unique filename
+  const storage = new CloudinaryStorage({
+    cloudinary,
+    params: {
+      folder: "profile_pictures", // Cloudinary folder name
+      allowed_formats: ["jpg", "jpeg", "png"],
     },
   });
   
@@ -82,7 +81,7 @@ async function init() {
       const updatedUser = await prismaClient.user.update({
         where: { id: userId },
         data: {
-          picture: `/uploads/${req.file.filename}`,
+          picture: req.file.path,
         },
       });
   
